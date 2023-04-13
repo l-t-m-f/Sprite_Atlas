@@ -106,32 +106,36 @@ internal class Program
                         SDL_FreeSurface(atlas.surface_data[i]);
                     }
 
+                // DEMO BEGINS
+                
+                // Create the master texture
                 var master_texture =
                     SDL_CreateTextureFromSurface(renderer,
                         atlas.master_surface);
+                // Extract a single image from the atlas (test)
                 var test_extract =
                     atlas.get_atlas_image("Tear");
+                // Query the texture for its width and height
                 SDL_QueryTexture(test_extract, out _, out _,
                     out var extract_w,
                     out var extract_h);
-
+                // Create the rectangles for the blit
                 var dst_rect = new SDL_Rect
                         { x = 50, y = 50, w = extract_w, h = extract_h };
                 var dst_rect2 = new SDL_Rect
                     {
                         x = 0, y = 0, w = Atlas.ATLAS_SIZE, h = Atlas.ATLAS_SIZE
                     };
-
-                foreach (var ae in atlas.entries)
-                    {
+                
 #if DEBUG
+                foreach (var ae in atlas.entries) {
                         Console.WriteLine(ae.filename);
-#endif
                     }
+#endif
 
                 while (true)
                     {
-                        while ((SDL_PollEvent(out SDL_Event e)) != 0)
+                        while ((SDL_PollEvent(out var e)) != 0)
                             {
                                 switch (e.type)
                                     {
@@ -164,10 +168,9 @@ internal class Program
 
                 if (SDL_Init(sdl_flags) < 0)
                     {
-#if DEBUG
-                        Console.WriteLine(
+
+                        SDL_LogError((int)SDL_LogCategory.SDL_LOG_CATEGORY_APPLICATION,
                             $"There was an issue starting SDL:\n{SDL_GetError()}!");
-#endif
                     }
 
                 _window = SDL_CreateWindow("SpriteAtlas Test",
@@ -176,28 +179,25 @@ internal class Program
 
                 if (_window == IntPtr.Zero)
                     {
-#if DEBUG
-                        Console.WriteLine(
+
+                        SDL_LogError((int)SDL_LogCategory.SDL_LOG_CATEGORY_APPLICATION,
                             $"There was an issue creating the window:\n{SDL_GetError()}");
-#endif
                     }
 
                 renderer = SDL_CreateRenderer(_window, -1, renderer_flags);
 
                 if (renderer == IntPtr.Zero)
                     {
-#if DEBUG
-                        Console.WriteLine(
+
+                        SDL_LogError((int)SDL_LogCategory.SDL_LOG_CATEGORY_APPLICATION,
                             $"There was an issue creating the renderer:\n{SDL_GetError()}");
-#endif
                     }
 
                 if (IMG_Init(img_flags) != (int)img_flags)
                     {
-#if DEBUG
-                        Console.WriteLine(
+                        SDL_LogError((int)SDL_LogCategory.SDL_LOG_CATEGORY_APPLICATION,
                             $"There was an issue starting SDL_image:\n{SDL_GetError()}!");
-#endif
+                        
                     }
             }
 

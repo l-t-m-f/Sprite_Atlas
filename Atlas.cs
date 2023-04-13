@@ -50,10 +50,9 @@ internal class Atlas : IComparer<IntPtr>
                         out _,
                         out _, out var height_x, out _) < 0)
                     {
-#if DEBUG
-                        Console.WriteLine(
+
+                        SDL_LogError((int)SDL_LogCategory.SDL_LOG_CATEGORY_APPLICATION,
                             $"There was an issue querying the texture \n{SDL_GetError()}");
-#endif
                         return 0;
                     }
 
@@ -63,10 +62,9 @@ internal class Atlas : IComparer<IntPtr>
                         out _,
                         out _, out var height_y, out _) < 0)
                     {
-#if DEBUG
-                        Console.WriteLine(
+
+                        SDL_LogError((int)SDL_LogCategory.SDL_LOG_CATEGORY_APPLICATION,
                             $"There was an issue querying the texture \n{SDL_GetError()}");
-#endif
                         return 0;
                     }
 
@@ -111,10 +109,9 @@ internal class Atlas : IComparer<IntPtr>
                     SDL_PIXELFORMAT_ARGB8888); // used to be RGBA8888
                 if (extracted_surface == IntPtr.Zero)
                     {
-#if DEBUG
-                        Console.WriteLine(
+
+                        SDL_LogError((int)SDL_LogCategory.SDL_LOG_CATEGORY_APPLICATION,
                             $"There was an issue creating the extracted surface:\n{SDL_GetError()}");
-#endif
                         return IntPtr.Zero;
                     }
 
@@ -122,10 +119,9 @@ internal class Atlas : IComparer<IntPtr>
                 if (SDL_BlitSurface(master_surface, ref extraction_rectangle,
                         extracted_surface, IntPtr.Zero) != 0)
                     {
-#if DEBUG
-                        Console.WriteLine(
+
+                        SDL_LogError((int)SDL_LogCategory.SDL_LOG_CATEGORY_APPLICATION,
                             $"There was an issue extracting the image:\n{SDL_GetError()}");
-#endif
                         SDL_FreeSurface(extracted_surface);
                         return IntPtr.Zero;
                     }
@@ -210,11 +206,10 @@ internal class Atlas : IComparer<IntPtr>
                 if (parent_node.width - used_w - width_padding < 0 ||
                     parent_node.height - used_h - height_padding < 0)
                     {
-#if DEBUG
-                        Console.WriteLine(
+
+                        SDL_LogError((int)SDL_LogCategory.SDL_LOG_CATEGORY_APPLICATION,
                             $"Invalid split at Node ({parent_node.x}, {parent_node.y}, " +
                             $"{parent_node.width}, {parent_node.height}) with dimensions ({used_w}, {used_h})");
-#endif
                         return;
                     }
 
