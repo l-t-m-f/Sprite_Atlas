@@ -10,11 +10,11 @@ internal class Program
         private const int WINDOW_W = 1280;
         private const int WINDOW_H = 720;
         private static IntPtr _window;
-        internal static IntPtr Renderer;
+        internal static IntPtr renderer;
 
         static void Main(string[] args)
             {
-                Setup();
+                setup();
                 Atlas atlas = new();
                 const string search_pattern = "*.png";
                 var file_names =
@@ -24,28 +24,28 @@ internal class Program
                     {
                         var file_path = Path.GetRelativePath(".", file_name);
                         //Console.WriteLine(filePath);
-                        atlas.SurfaceData[atlas.Entries.Count] = IMG_Load(file_path);
-                        atlas.Entries.Add(new AtlasEntry(file_path, new SDL_Rect { x = 0, y = 0, w = 0, h = 0 }, false));
+                        atlas.surface_data[atlas.entries.Count] = IMG_Load(file_path);
+                        atlas.entries.Add(new AtlasEntry(file_path, new SDL_Rect { x = 0, y = 0, w = 0, h = 0 }, false));
 
                     }
 
-                Array.Resize(ref atlas.SurfaceData, atlas.Entries.Count);
-                Array.Sort(atlas.SurfaceData, atlas);
+                Array.Resize(ref atlas.surface_data, atlas.entries.Count);
+                Array.Sort(atlas.surface_data, atlas);
 
-                for (var i = 0; i < atlas.SurfaceData.Length; i++)
+                for (var i = 0; i < atlas.surface_data.Length; i++)
                     {
                         SDL_QueryTexture(
-                            SDL_CreateTextureFromSurface(Renderer,
-                                atlas.SurfaceData[i]), out _, out _, out int w,
+                            SDL_CreateTextureFromSurface(renderer,
+                                atlas.surface_data[i]), out _, out _, out int w,
                             out int h);
 
                         var rotated = false;
-                        var found_node = Atlas.FindNode(atlas.First, w, h);
+                        var found_node = Atlas.find_node(atlas.first, w, h);
 
                         if (found_node == null)
                             {
                                 rotated = true;
-                                found_node = Atlas.FindNode(atlas.First, h, w);
+                                found_node = Atlas.find_node(atlas.first, h, w);
                             }
 
                         if (found_node != null)
@@ -57,48 +57,48 @@ internal class Program
                                 
                                 if(rotated)
                                     {
-                                        found_node.Height = w;
-                                        found_node.Width = h;
+                                        found_node.height = w;
+                                        found_node.width = h;
                                         //rotations++;
                                     }
                                 
                                 var dest = new SDL_Rect
                                     {
-                                        x = found_node.X,
-                                        y = found_node.Y,
-                                        w = found_node.Width,
-                                        h = found_node.Height
+                                        x = found_node.x,
+                                        y = found_node.y,
+                                        w = found_node.width,
+                                        h = found_node.height
                                     };
 
-                                atlas.Entries[i] = new AtlasEntry(atlas.Entries[i].Filename, dest, rotated);
+                                atlas.entries[i] = new AtlasEntry(atlas.entries[i].filename, dest, rotated);
 
                                 if (rotated == false)
                                     {
-                                        SDL_BlitSurface(atlas.SurfaceData[i],
+                                        SDL_BlitSurface(atlas.surface_data[i],
                                             IntPtr.Zero,
-                                            atlas.MasterSurface,
+                                            atlas.master_surface,
                                             ref dest);
                                     }
                                 else
                                     {
-                                        IntPtr result = BlitRotated(atlas.SurfaceData[i]);
+                                        IntPtr result = blit_rotated(atlas.surface_data[i]);
                                         if (result != IntPtr.Zero)
                                             {
                                                 
                                                 SDL_BlitSurface(result,
                                                 IntPtr.Zero,
-                                                atlas.MasterSurface,
+                                                atlas.master_surface,
                                                     ref dest);
                                             }
                                     }
                             }
-                        SDL_FreeSurface(atlas.SurfaceData[i]);
+                        SDL_FreeSurface(atlas.surface_data[i]);
                     }
 
                 var master_texture =
-                    SDL_CreateTextureFromSurface(Renderer, atlas.MasterSurface);
+                    SDL_CreateTextureFromSurface(renderer, atlas.master_surface);
                 var test_extract =
-                    atlas.GetAtlasImage("Images\\Tear.png");
+                    atlas.get_atlas_image("Images\\Tear.png");
                 SDL_QueryTexture(test_extract, out _, out _,
                     out var extract_w,
                     out var extract_h);
@@ -110,11 +110,9 @@ internal class Program
                         x = 0, y = 0, w = Atlas.ATLAS_SIZE, h = Atlas.ATLAS_SIZE
                     };
 
-                foreach (var ae in atlas.Entries)
+                foreach (var ae in atlas.entries)
                     {
-                        if (ae is null) break;
-                        else
-                            Console.WriteLine(ae.Filename);
+                        Console.WriteLine(ae.filename);
                     }
 
                 while (true)
@@ -131,16 +129,16 @@ internal class Program
                                     }
                             }
 
-                        SDL_SetRenderDrawColor(Renderer, 255, 0, 0, 255);
-                        SDL_RenderClear(Renderer);
-                        SDL_RenderCopy(Renderer,
+                        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+                        SDL_RenderClear(renderer);
+                        SDL_RenderCopy(renderer,
                             master_texture,
                             0, ref dst_rect2);
-                        SDL_RenderPresent(Renderer);
+                        SDL_RenderPresent(renderer);
                     }
             }
 
-        private static void Setup()
+        private static void setup()
             {
                 if (SDL_Init(SDL_INIT_VIDEO) < 0)
                     {
@@ -158,11 +156,11 @@ internal class Program
                             $"There was an issue creating the window:\n{SDL_GetError()}");
                     }
 
-                Renderer = SDL_CreateRenderer(_window, -1,
+                renderer = SDL_CreateRenderer(_window, -1,
                     SDL_RendererFlags.SDL_RENDERER_ACCELERATED |
                     SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
 
-                if (Renderer == IntPtr.Zero)
+                if (renderer == IntPtr.Zero)
                     {
                         Console.WriteLine(
                             $"There was an issue creating the renderer:\n{SDL_GetError()}");
@@ -176,9 +174,9 @@ internal class Program
                     }
             }
         
-        private static (byte r, byte g, byte b, byte a) GetPixelColorValues(IntPtr surface_ptr, int x, int y)
+        private static (byte r, byte g, byte b, byte a) get_pixel_color_values(IntPtr surface_ptr, int x, int y)
             {
-                uint pixel = GetPixel(surface_ptr, x, y);
+                uint pixel = get_pixel(surface_ptr, x, y);
                 byte r = (byte)((pixel >> 24) & 0xFF);
                 byte g = (byte)((pixel >> 16) & 0xFF);
                 byte b = (byte)((pixel >> 8) & 0xFF);
@@ -187,40 +185,34 @@ internal class Program
             }
 
 
-        public static IntPtr BlitRotated(IntPtr source_surface_ptr)
+        private static IntPtr blit_rotated(IntPtr source_surface_ptr)
             {
-                SDL_Surface source_surface =
+                var source_surface =
                     Marshal.PtrToStructure<SDL_Surface>(source_surface_ptr);
                 
                 Console.WriteLine($"Source surface dimensions: {source_surface.w}x{source_surface.h}");
 
                 
-                IntPtr dest_surface_ptr = SDL_CreateRGBSurfaceWithFormat(0,
+                var dest_surface_ptr = SDL_CreateRGBSurfaceWithFormat(0,
                     source_surface.h, source_surface.w, 32,
                     SDL_PIXELFORMAT_ARGB8888);
 
                 SDL_LockSurface(source_surface_ptr);
                 SDL_LockSurface(dest_surface_ptr);
 
-                for (int y = 0; y < source_surface.h; y++)
+                for (var y = 0; y < source_surface.h; y++)
                     {
-                        for (int x = 0; x < source_surface.w; x++)
+                        for (var x = 0; x < source_surface.w; x++)
                             {
-                                UInt32 pixel = GetPixel(source_surface_ptr, x, y);
-                                
-                                
-                                (byte r, byte g, byte b, byte a) = GetPixelColorValues(source_surface_ptr, x, y);
+                                var pixel = get_pixel(source_surface_ptr, x, y);
+                                var (r, g, b, a) = get_pixel_color_values(source_surface_ptr, x, y);
                                 Console.WriteLine($"Source Pixel ({x}, {y}): R: {r} G: {g} B: {b} A: {a}");
+                                var dest_x = source_surface.h - y - 1;
+                                set_pixel(dest_surface_ptr, dest_x, x, pixel);
 
-                                
-                                int dest_x = source_surface.h - y - 1;
-                                int dest_y = x;
-                                SetPixel(dest_surface_ptr, dest_x, dest_y, pixel);
-                                
-                                
-                                (byte dest_r, byte dest_g, byte dest_b, byte dest_a) = GetPixelColorValues(dest_surface_ptr, dest_x, dest_y);
-                                Console.WriteLine($"Dest Pixel ({dest_x}, {dest_y}): R: {dest_r} G: {dest_g} B: {dest_b} A: {dest_a}");
-                                SetPixel(dest_surface_ptr, dest_x, dest_y, pixel);
+                                var (dest_r, dest_g, dest_b, dest_a) = get_pixel_color_values(dest_surface_ptr, dest_x, x);
+                                Console.WriteLine($"Dest Pixel ({dest_x}, {x}): R: {dest_r} G: {dest_g} B: {dest_b} A: {dest_a}");
+                                set_pixel(dest_surface_ptr, dest_x, x, pixel);
 
                                 //
                                 // // Check for transparency
@@ -238,30 +230,30 @@ internal class Program
                 return dest_surface_ptr;
             }
 
-        private static UInt32 GetPixel(IntPtr surface_ptr, int x, int y)
+        private static uint get_pixel(IntPtr surface_ptr, int x, int y)
             {
-                SDL_Surface surface =
+                var surface =
                     Marshal.PtrToStructure<SDL_Surface>(surface_ptr);
-                int bpp = 4; //RGBA8888
-                IntPtr pixel = surface.pixels + y * surface.pitch + x * bpp;
-                return (UInt32)Marshal.ReadInt32(pixel);
+                const int bytes_per_pixel = 4; //RGBA8888
+                var pixel = surface.pixels + y * surface.pitch + x * bytes_per_pixel;
+                return (uint)Marshal.ReadInt32(pixel);
             }
-        private static void SetPixel(IntPtr surface_ptr, int x, int y, UInt32 new_pixel)
+        private static void set_pixel(IntPtr surface_ptr, int x, int y, uint new_pixel)
             {
-                SDL_Surface surface =
+                var surface =
                     Marshal.PtrToStructure<SDL_Surface>(surface_ptr);
-                int bpp = 4; //RGBA8888
-                IntPtr pixel = surface.pixels + y * surface.pitch + x * bpp;
+                const int bytes_per_pixel = 4; //RGBA8888
+                var pixel = surface.pixels + y * surface.pitch + x * bytes_per_pixel;
                 
-                byte originalAlpha = (byte)(Marshal.ReadInt32(pixel) & 0xFF);
+                var original_alpha = (byte)(Marshal.ReadInt32(pixel) & 0xFF);
     
                 // If the original pixel's alpha value is 255, set the new pixel's alpha value to 255
-                if (originalAlpha == 255)
+                if (original_alpha == 255)
                     {
                         new_pixel |= 0xFF000000;
                     }
                 
-                Marshal.WriteInt32(pixel, (Int32)new_pixel);
+                Marshal.WriteInt32(pixel, (int)new_pixel);
             }
 
     }
