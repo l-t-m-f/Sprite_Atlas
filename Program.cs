@@ -245,13 +245,6 @@ internal class Program
                 const int bytes_per_pixel = 4; //RGBA8888
                 var pixel = surface.pixels + y * surface.pitch + x * bytes_per_pixel;
                 
-                var original_alpha = (byte)(Marshal.ReadInt32(pixel) & 0xFF);
-    
-                // If the original pixel's alpha value is 255, set the new pixel's alpha value to 255
-                if (original_alpha == 255)
-                    {
-                        new_pixel |= 0xFF000000;
-                    }
                 
                 Marshal.WriteInt32(pixel, (int)new_pixel);
             }
