@@ -8,14 +8,14 @@ namespace SpriteAtlas;
  * It has the ability to sort images based on their height, which is
  * encapsulated by the IComparer interface.
  */
-internal class Atlas : IComparer<nint>
+internal class Atlas : IComparer<IntPtr>
     {
         internal const int ATLAS_SIZE = 300;
         private const int PADDING = 4;
 
         public List<AtlasEntry> entries { get; }
 
-        internal nint[] surface_data = new nint[50]; // surfaces
+        internal IntPtr[] surface_data = new IntPtr[50]; // surfaces
         public readonly AtlasNode first;
         private readonly LinkedList<AtlasNode> _nodes = new();
         internal readonly IntPtr master_surface;
@@ -80,7 +80,7 @@ internal class Atlas : IComparer<nint>
         /// </summary>
         /// <param name="filename"></param>
         /// <returns></returns>
-        public nint get_atlas_image(string filename)
+        public IntPtr get_atlas_image(string filename)
             {
                 AtlasEntry? entry = null;
                 foreach (var t in entries)
