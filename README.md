@@ -6,6 +6,12 @@ SpriteAtlas using the C# SDL2 binding.
 Early proof on concept inspired by the C Sprite Atlas of Parallel Realities.
 Only works with .png.
 
+
+## NuGet Package Dependency
+
+Install Sayers's SDL2 bindings is the easiest way to get SDL2 on C#.
+Search Sayers in the NuGet package manager in your IDE.
+
 ## How to use
 1. Create an Images directory.
 2. Place .pngs in the directory.
