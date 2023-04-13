@@ -13,4 +13,9 @@ Only works with .png.
 4. (Texture size can be adjusted in the Atlas class.)
 5. You can also draw individual images from the Atlas by their filename.
 
+## Purpose
+
+Make rendering faster with the simple SDL2 library by reducing the amount of textures loaded.
+Useful for making a 2D game engine, for example.
+
 Code by Émile Fréchette.
