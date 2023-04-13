@@ -37,21 +37,24 @@ internal class AtlasEntry
 
 internal class Atlas : IComparer<nint>
     {
-        internal const int ATLAS_SIZE = 512;
+        internal const int ATLAS_SIZE = 300;
         private const int PADDING = 2;
         
-        internal readonly AtlasEntry?[] Entries = new AtlasEntry[50];
-        internal readonly nint[] SurfaceData = new nint[50]; // surfaces
+        public List<AtlasEntry> Entries { get; }
+
+        internal nint[] SurfaceData = new nint[50]; // surfaces
         public readonly Node First;
         private readonly LinkedList<Node> _nodes = new();
         internal readonly IntPtr MasterSurface;
 
         public Atlas()
             {
+                Entries = new List<AtlasEntry>();
                 var root_node = new Node(0, 0, ATLAS_SIZE, ATLAS_SIZE);
                 _nodes.AddLast(root_node);
                 MasterSurface =
-                    SDL_CreateRGBSurfaceWithFormat(0, ATLAS_SIZE, ATLAS_SIZE, 32,
+                    SDL_CreateRGBSurfaceWithFormat(0, ATLAS_SIZE, ATLAS_SIZE,
+                        32,
                         SDL_PIXELFORMAT_RGBA8888);
                 First = root_node;
             }
@@ -73,7 +76,7 @@ internal class Atlas : IComparer<nint>
                     }
 
                 var extraction_rectangle = entry.Rectangle;
-                
+
                 // Create a new surface to hold the extracted image
                 var extracted_surface = SDL_CreateRGBSurfaceWithFormat(0,
                     extraction_rectangle.w, extraction_rectangle.h, 32,
@@ -111,7 +114,8 @@ internal class Atlas : IComparer<nint>
                         out _,
                         out _, out var height_x, out _) < 0)
                     {
-                        Console.WriteLine("There was an issue querying the texture");
+                        Console.WriteLine(
+                            $"There was an issue querying the texture \n{SDL_GetError()}");
                         return 0;
                     }
 
@@ -122,7 +126,9 @@ internal class Atlas : IComparer<nint>
                     {
                         return height_y.CompareTo(height_x);
                     }
-                Console.WriteLine("There was an issue querying the texture");
+
+                Console.WriteLine(
+                    $"There was an issue querying the texture \n{SDL_GetError()}");
                 return 0;
 
                 // Descending order
@@ -132,31 +138,59 @@ internal class Atlas : IComparer<nint>
             {
                 if (root.Used)
                     {
-                        if (root.Children == null) return null;
+                        if (root.Children == null)
+                            {
+                                Console.WriteLine(
+                                    $"Node ({root.X}, {root.Y}, " +
+                                    $"{root.Width}, {root.Height}) is used but has no children.");
+                
+                                return null;
+                            }
+                
                         var node = FindNode(root.Children[0], w, h) ??
                                    FindNode(root.Children[1], w, h);
                         return node;
                     }
                 else if (w <= root.Width && h <= root.Height)
                     {
+                        Console.WriteLine($"Found a suitable node at ({root.X}, {root.Y}, " +
+                                          $"{root.Width}, {root.Height}) for dimensions ({w}, {h})");
+                
                         SplitNode(root, w, h);
                         return root;
                     }
-
+                
+                Console.WriteLine($"Node ({root.X}, {root.Y}, " +
+                                  $"{root.Width}, {root.Height}) is too small for dimensions ({w}, {h})");
+                
                 return null;
+                
+                
+                
             }
 
         private static void SplitNode(Node node, int w, int h)
             {
                 node.Used = true;
 
+                int widthPadding = (node.Width - w >= PADDING) ? PADDING : 0;
+                int heightPadding = (node.Height - h >= PADDING) ? PADDING : 0;
+                
+                if (node.Width - w - widthPadding < 0 || node.Height - h - heightPadding < 0)
+                    {
+                        Console.WriteLine(
+                            $"Invalid split at Node ({node.X}, {node.Y}, " +
+                            $"{node.Width}, {node.Height}) with dimensions ({w}, {h})");
+                        return;
+                    }
+
                 node.Children = new Node[2];
-                node.Children[0] = 
-                    new Node(node.X + w + PADDING, node.Y,
-                    node.Width - w - PADDING, h);
-                node.Children[1] = 
-                    new Node(node.X, node.Y + h + PADDING,
-                    node.Width, node.Height - h - PADDING);
+                node.Children[0] =
+                    new Node(node.X + w + widthPadding, node.Y,
+                        node.Width - w - widthPadding, h);
+                node.Children[1] =
+                    new Node(node.X, node.Y + h + heightPadding,
+                        node.Width, node.Height - h - heightPadding);
             }
     }
 }
