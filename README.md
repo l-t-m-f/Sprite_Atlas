@@ -11,7 +11,7 @@ Only works with .png.
 2. Place .pngs in the directory.
 3. Run the demo, it will display a single texture which contains the individual images collaged together side-by-side.
 4. (Texture size can be adjusted in the Atlas class.)
-5. You can also draw individual images from the Atlas by their filename.
+5. You can also draw individual images from the Atlas by their simple name (for example to acquire an SDL_Texture pointer of Images/abc.png, just draw get_atlas_image("abc")). This texture that will be acquired does not call any Loading function, since it just blits from the existing atlas surface! Big performance saver.
 
 ## Purpose
 
