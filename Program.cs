@@ -74,8 +74,8 @@ internal class Program
                                     {
                                         x = found_node.x,
                                         y = found_node.y,
-                                        w = found_node.width,
-                                        h = found_node.height
+                                        w = w,
+                                        h = h
                                     };
 
                                 atlas.entries[i] =
@@ -114,7 +114,7 @@ internal class Program
                         atlas.master_surface);
                 // Extract a single image from the atlas (test)
                 var test_extract =
-                    atlas.get_atlas_image("Tear");
+                    atlas.get_atlas_image("1");
                 // Query the texture for its width and height
                 SDL_QueryTexture(test_extract, out _, out _,
                     out var extract_w,

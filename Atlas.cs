@@ -12,7 +12,7 @@ namespace SpriteAtlas;
  */
 internal class Atlas : IComparer<IntPtr>
     {
-        internal const int ATLAS_SIZE = 300;
+        internal const int ATLAS_SIZE = 700;
         private const int PADDING = 4;
 
         public List<AtlasEntry> entries { get; }
